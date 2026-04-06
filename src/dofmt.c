@@ -23,107 +23,44 @@ static void reverse(char *str, size_t len) {
 	}
 }
 
-static size_t itoa(unsigned num, char *dst, unsigned base,
-	BOOL issigned, BOOL addplus, BOOL uppercase)
-{
-	char a = uppercase ? 'A' : 'a';
-	char negative = FALSE;
-	char *d = dst;
-	size_t len;
+#define DEFINE_XTOA_FUNC(type,name) \
+static size_t name(unsigned type num, char *dst, unsigned int base, \
+                   BOOL issigned, BOOL addplus, BOOL uppercase)     \
+{                                                                   \
+	char alphainc = (uppercase ? 'A' : 'a') - 10;                   \
+	BOOL negative = FALSE;                                          \
+	char *d = dst;                                                  \
+	size_t len;                                                     \
+                                                                    \
+	if (num == 0) {                                                 \
+		*d++ = '0';                                                 \
+		return 1;                                                   \
+	}                                                               \
+                                                                    \
+	if (issigned && (signed type)num < 0 && base == 10) {           \
+		negative = TRUE;                                            \
+		num = -num;                                                 \
+	}                                                               \
+                                                                    \
+	while (num != 0) {                                              \
+		unsigned int rem = num % base;                              \
+		num /= base;                                                \
+		*d++ = (rem >= 10) ? (rem + alphainc) : (rem + '0');        \
+	}                                                               \
+                                                                    \
+	if (negative)                                                   \
+		*d++ = '-';                                                 \
+	else if (addplus)                                               \
+		*d++ = '+';                                                 \
+                                                                    \
+	len = d - dst;                                                  \
+	reverse(dst, len);                                              \
+	return len;                                                     \
+}                                                                   \
 
-	if (num == 0) {
-		*d++ = '0';
-		return d - dst;
-	}
-
-	if (issigned && (int)num < 0 && base == 10) {
-		negative = TRUE;
-		num = -num;
-	}
-
-	while (num != 0) {
-		unsigned rem = num % base;
-		num /= base;
-		*d++ = (rem > 9) ? (rem - 10 + a) : (rem + '0');
-	}
-
-	if (negative)
-		*d++ = '-';
-	else if (addplus)
-		*d++ = '+';
-
-	len = d - dst;
-	reverse(dst, len);
-	return len;
-}
-
-static size_t ltoa(unsigned long num, char *dst, unsigned base,
-	BOOL issigned, BOOL addplus, BOOL uppercase)
-{
-	char a = uppercase ? 'A' : 'a';
-	char negative = FALSE;
-	char *d = dst;
-	size_t len;
-
-	if (num == 0) {
-		*d++ = '0';
-		return d - dst;
-	}
-
-	if (issigned && (long)num < 0 && base == 10) {
-		negative = TRUE;
-		num = -num;
-	}
-
-	while (num != 0) {
-		unsigned rem = num % base;
-		num /= base;
-		*d++ = (rem > 9) ? (rem - 10 + a) : (rem + '0');
-	}
-
-	if (negative)
-		*d++ = '-';
-	else if (addplus)
-		*d++ = '+';
-
-	len = d - dst;
-	reverse(dst, len);
-	return len;
-}
-
-static size_t lltoa(unsigned long long num, char *dst, unsigned base,
-	BOOL issigned, BOOL addplus, BOOL uppercase)
-{
-	char a = uppercase ? 'A' : 'a';
-	char negative = FALSE;
-	char *d = dst;
-	size_t len;
-
-	if (num == 0) {
-		*d++ = '0';
-		return d - dst;
-	}
-
-	if (issigned && (signed long long)num < 0 && base == 10) {
-		negative = TRUE;
-		num = -num;
-	}
-
-	while (num != 0) {
-		unsigned rem = num % base;
-		num /= base;
-		*d++ = (rem > 9) ? (rem - 10 + a) : (rem + '0');
-	}
-
-	if (negative)
-		*d++ = '-';
-	else if (addplus)
-		*d++ = '+';
-
-	len = d - dst;
-	reverse(dst, len);
-	return len;
-}
+DEFINE_XTOA_FUNC(int,itoa)
+DEFINE_XTOA_FUNC(long,ltoa)
+DEFINE_XTOA_FUNC(long long,lltoa)
 
 #define PUTC(ch) \
 	do { \
