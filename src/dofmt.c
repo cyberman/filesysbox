@@ -56,7 +56,7 @@ static size_t name(unsigned type num, char *dst, unsigned int base, \
 	len = d - dst;                                                  \
 	reverse(dst, len);                                              \
 	return len;                                                     \
-}                                                                   \
+}
 
 DEFINE_XTOA_FUNC(int,itoa)
 DEFINE_XTOA_FUNC(long,ltoa)
